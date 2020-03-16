@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Signup - 3030.link</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js" defer type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<div id = "signup-page" class="main-content">
+    <h2>Signup</h2>
+<form>
+    <div class="form-group">
+        <label for = "username">Username</label>
+        <input type="text" class="form-control" id="username">
+    </div>
+    <div class="form-group">
+        <label for = "password">Password</label>
+        <input type="password" class="form-control" id="password">
+    </div>
+    <button id = "signup-submit" type="submit" class="btn btn-primary">Sign up</button>
+  </form>
+</div>
+
+
+  <script>
+      function signup(e) {
+          e.preventDefault()
+          const username = $("#username"). val()
+          const password = $("#password"). val()
+          $.ajax({
+              type:"POST",
+              url:'add-user',
+              data: {user: {username: username, password: password, quote: 10}},
+              success: function(response){
+                  console.log(response)
+                  if(response == "success") {
+                    window.location.replace("/login");
+                  }
+                  else {
+                      alert("Try again!")
+                  }
+                }
+            });
+      }
+      document.getElementById("signup-submit").addEventListener("click", e => signup(e))
+  </script>
+</html>

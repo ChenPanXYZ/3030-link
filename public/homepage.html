@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>3030.link - URL Shorter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js" defer type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+
+<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+</head>
+<div id = "home-page" class="main-content">
+    <h2>3030.link</h2>
+    <form>
+        <div class="form-group">
+            <label for = "fullUrlInput">Full URL</label>
+            <input type="text" class="form-control" id="fullUrlInput">
+        </div>
+        <div class="form-group">
+            <label for = "shortUrlInput">Short URL</label>
+            <input type="text" class="form-control" id="shortUrlInput">
+        </div>
+        <button id = "urlFormSubmit" type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <br>
+    <button id = "checker-button" type="submit" class="btn btn-primary">See my Quote and Links</button>
+
+    <div class="form-group">
+        <label for = "new-password">New Password</label>
+        <input type="password" class="form-control" id="new-password" required>
+    </div>
+    <button id = "new-password-submit" type="submit" class="btn btn-primary">New Password</button>
+</div>
+
+  <script>
+      let quote = 0
+      let checkerOpen = 0
+
+      function newPasswor(e) {
+        e.preventDefault()
+        const newPassword = document.getElementById("new-password").value
+        if(newPassword == '') {
+            alert("Password can not be empty!")
+        }
+        else {
+            $.ajax({
+              type:"POST",
+              url:'change-password',
+              data: {newPassword: newPassword},
+              success: function(response){
+                  if(response == "success") {
+                      alert("Password Changed Successfully!")
+                      document.getElementById("new-password").value = ''
+                  }
+                }
+            })
+        }
+      }
+
+
+      function deleteUrlFunc(e) {
+          e.preventDefault()
+          const shortUrl = e.target.getAttribute('shortUrl')
+          const link = e.target.parentElement.parentElement
+
+          $.ajax({
+              type:"POST",
+              url:'delete',
+              data: {shortUrl: shortUrl},
+              success: function(response){
+                  if(response == "success") {
+                    link.parentElement.removeChild(link)
+                    let quoteInfo = document.getElementById("quoteInfo")
+                    quoteInfo.innerHTML = "Total Quotes: " + parseInt(quote + 1)
+                    quote = quote + 1
+                  }
+                }
+            })
+
+      }
+
+      function checkerInit(e) {
+        e.preventDefault()
+        $.ajax({
+              type:"GET",
+              url:'checker',
+              success: function(links){
+                  let table = document.createElement('table')
+                  table.classList.add("pure-table")
+                  let tableHead = document.createElement('thead')
+                  let tr = document.createElement('tr')
+
+                  let fullUrl = document.createElement('th')
+                  fullUrl.textContent = "Full"
+                  fullUrl.setAttribute("id", "fullUrl-table-head")
+                  let shortUrl = document.createElement('th')
+                  shortUrl.textContent = "Short"
+                  shortUrl.setAttribute("id", "shortUrl-table-head")
+                  let deleteUrl = document.createElement('th')
+                  deleteUrl.textContent = "Delete"
+                  tr.appendChild(fullUrl)
+                  tr.appendChild(shortUrl)
+                  tr.appendChild(deleteUrl)
+                  tableHead.appendChild(tr)
+                  table.appendChild(tableHead)
+
+
+                  let tableBody = document.createElement('tbody')
+                  tableBody.setAttribute("id", "link-table-body")
+
+                  for(let i = 0; i < links.length; i++) {
+                      const link = links[i]
+                      let newRow = document.createElement('tr')
+
+                        let fullUrl = document.createElement('td')
+                        fullUrl.textContent = link.fullUrl
+                        let shortUrl = document.createElement('td')
+                        shortUrl.textContent = link.shortUrl
+                        let deleteUrl = document.createElement('td')
+
+                        let deleteUrlButton = document.createElement('button')
+
+                        deleteUrlButton.textContent = "delete"
+                        deleteUrlButton.classList.add('deleteUrlButton')
+                        deleteUrlButton.setAttribute("shortUrl", link.shortUrl)
+                        deleteUrlButton.addEventListener("click", e => deleteUrlFunc(e))
+                        deleteUrl.appendChild(deleteUrlButton)
+                        newRow.appendChild(fullUrl)
+                        newRow.appendChild(shortUrl)
+                        newRow.appendChild(deleteUrl)
+                        
+                        tableBody.appendChild(newRow)
+                  }
+
+                  table.appendChild(tableBody)
+
+                  quote = 10 - links.length
+
+                  let quoteInfo = document.createElement("p")
+                  quoteInfo.setAttribute("id", "quoteInfo")
+                  quoteInfo.innerHTML = "Total Quotes: " + quote
+                  let checker = document.createElement("div")
+                  checker.setAttribute("id", "checker")
+                  checker.append(quoteInfo)
+                  checker.append(table)
+                  document.getElementById("home-page").appendChild(checker)
+                  checker = 1
+
+                }
+            });
+      }
+
+      function checker(e) {
+        e.preventDefault()
+        if(document.getElementById("quoteInfo") == null) {
+            checkerInit(e)
+            checkerOpen = 1
+        }
+        else {
+            let checker = document.getElementById("checker")
+            if(checkerOpen == 0) {
+                checker.style.display = "block"
+                checkerOpen = 1
+            }
+            else {
+                checker.style.display = "none"
+                checkerOpen = 0
+            }
+
+        }
+      }
+
+
+      function addUrl(e) {
+          e.preventDefault()
+          const fullUrl = $("#fullUrlInput"). val()
+          const shortUrl = $("#shortUrlInput"). val()
+          $.ajax({
+              type:"POST",
+              url:'add',
+              data: {fullUrl: fullUrl, shortUrl: shortUrl},
+              success: function(response){
+                  if(response == "quote not enough") {
+                      alert("You Quote is not enough!")
+                  }
+                  else if(response == "duplicated shorturl") {
+                      alert("Shorturl already exists!")
+                      $("#shortUrlInput"). val("")
+                  }
+                  else if(response == "rebot") {
+                    alert("Rebot is not welcomed!")
+                  }
+                  else if(response == "illegal char") {
+                    alert("Only Digits and Letters are accepted!")
+                  }
+                  else {
+                    alert("Add Success!")
+                    if(document.getElementById("quoteInfo") != null) {
+                        let quoteInfo = document.getElementById("quoteInfo")
+                        quoteInfo.innerHTML = "Total Quotes: " + parseInt(quote - 1)
+                        quote = quote - 1
+                        let newRow = document.createElement('tr')
+
+                        let fullUrl = document.createElement('td')
+                        fullUrl.textContent = $("#fullUrlInput"). val()
+                        let shortUrl = document.createElement('td')
+                        shortUrl.textContent = $("#shortUrlInput"). val()
+                        let deleteUrl = document.createElement('td')
+
+                        let deleteUrlButton = document.createElement('button')
+
+                        deleteUrlButton.textContent = "Delete"
+                        deleteUrlButton.classList.add('deleteUrlButton')
+                        deleteUrlButton.setAttribute("shortUrl", shortUrl)
+                        deleteUrlButton.addEventListener("click", e => deleteUrlFunc(e))
+                        deleteUrl.appendChild(deleteUrlButton)
+                        newRow.appendChild(fullUrl)
+                        newRow.appendChild(shortUrl)
+                        newRow.appendChild(deleteUrl)
+
+                        let tableBody = document.getElementById('link-table-body')
+
+
+
+                        tableBody.appendChild(newRow)
+                    }
+                    $("#fullUrlInput"). val("")
+                    $("#shortUrlInput"). val("")
+                    //Notice fullUrl are used for both text and container
+
+                  }
+                }
+            })
+      }
+
+      document.getElementById("urlFormSubmit").addEventListener("click", e => addUrl(e))
+      document.getElementById("checker-button").addEventListener("click", e => checker(e))
+      document.getElementById("new-password-submit").addEventListener("click", e => newPasswor(e))
+  </script>
+</html>
