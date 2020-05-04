@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>3030.link - URL Shorter</title>
+<title>3030.link - URL Shortener</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="3030.link is a free url shortener service. Every user can give alias to up to 10 urls."/>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js" defer type="text/javascript"></script>
 <link rel="stylesheet" type="text/css" href="style.css">
@@ -188,11 +189,15 @@
                       alert("Shorturl already exists!")
                       $("#shortUrlInput"). val("")
                   }
+                  else if(response == "not valid url") {
+                      alert("Please give a valid HTTP URL!")
+                      $("#fullUrlInput"). val("")
+                  }
                   else if(response == "rebot") {
                     alert("Rebot is not welcomed!")
                   }
                   else if(response == "illegal char") {
-                    alert("Only Digits and Letters are accepted!")
+                    alert("Only Digits, Letters, Hythens, and Underscores are accepted!")
                   }
                   else {
                     alert("Add Success!")
@@ -230,6 +235,9 @@
                     //Notice fullUrl are used for both text and container
 
                   }
+                },
+                error: function(response){ 
+                    console.log(response)
                 }
             })
       }

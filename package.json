@@ -2,9 +2,9 @@
   "name": "url_shorter",
   "version": "1.0.0",
   "description": "URL Shorter developed by Pan Chen",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "devStart": "nodemon index.js",
+    "devStart": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

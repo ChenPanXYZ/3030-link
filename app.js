@@ -27,7 +27,14 @@ const urlSchema = schemas.urlSchema
 const userSchema = schemas.userSchema
 const Url = mongoose.model('url', urlSchema, 'url')
 const User = mongoose.model('user', userSchema, 'user')
-const Bcrypt = require("bcryptjs");
+const Bcrypt = require("bcryptjs")
+
+
+function isValidUrl(value) {
+    return /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(value);
+}
+
+
 app.use(express.static(__dirname + '/public'))
 app.get('/',function(req,res) {
     if (req.session.loggedin) {
@@ -50,7 +57,7 @@ app.get('/login',function(req,res) {
 
 
 app.get('/checker',function(req,res) {
-    Url.find({'maker': req.session.username}, function(err, links){
+    Url.find({'maker': req.session._id}, function(err, links){
          res.send(links)
     })
 })
@@ -70,7 +77,7 @@ app.post('/add-user', (req, res) => {
 app.post('/change-password', (req, res) => {
     req.body.newPassword = Bcrypt.hashSync(req.body.newPassword, 10);
 
-    User.findOneAndUpdate({username: req.session.username}, {$set:{password: req.body.newPassword}},function(err, doc){
+    User.findOneAndUpdate({username: req.session._id}, {$set:{password: req.body.newPassword}},function(err, doc){
         if(err){
             console.log("Something wrong when updating data!");
         }
@@ -94,6 +101,7 @@ app.post('/auth', (req, res) => {
             req.session.loggedin = true
             req.session.username = user.username
             req.session.quote = user.quote
+            req.session._id = user._id
             res.send("success")
         }
     })
@@ -106,15 +114,22 @@ app.post('/add', (req, res) => {
     if(req.session.quote <= 0 ) {
         res.send("quote not enough")
     }
-    else if(!(/^[a-z0-9]+$/.test(req.body.shortUrl))) {
+    else if(!(/^[a-zA-Z0-9_-]+$/.test(req.body.shortUrl))) {
         res.send("illegal char")
     }
     else {
+        if (!((req.body.fullUrl.indexOf("http://") == 0 || req.body.fullUrl.indexOf("https://") == 0))) {
+            req.body.fullUrl = "http://" + req.body.fullUrl
+        }
+        if (!isValidUrl(req.body.fullUrl)) {
+            res.send("not valid url")
+            return
+        }
         var url = new Url(
             {
                 fullUrl: req.body.fullUrl,
                 shortUrl: req.body.shortUrl,
-                maker: req.session.username
+                maker: req.session._id
             })
         url.save(function (err, url) {
             if (err) {
@@ -128,7 +143,7 @@ app.post('/add', (req, res) => {
             }
             else {
                 User.findOneAndUpdate(
-                    { 'username': req.session.username},
+                    { 'username': req.session._id},
                     { '$inc': { 'quote': -1 } }, 
                     function (err, user) {
                         if (err) throw err
@@ -157,7 +172,7 @@ app.post('/delete', (req, res) => {
       })
 })
 
-app.get('/:shortUrl([0-9|a-z]+)', (req, res) => {
+app.get('/:shortUrl([a-zA-Z0-9_-]+)', (req, res) => {
     const shorUrl = req.params.shortUrl
     Url.findOne(
         {
@@ -167,7 +182,8 @@ app.get('/:shortUrl([0-9|a-z]+)', (req, res) => {
         {
             if (err) return console.error(err)
             if (url == undefined) {
-                res.send("nothing found")
+                res.redirect(302, "/")
+                // res.send("nothing found")
             }
             else {
                 const fullUrl = url.fullUrl
