@@ -30,7 +30,20 @@ const useStyles = makeStyles((theme) => ({
     },
     tableCell: {
         wordBreak: "break-all"
+    },
+    leftCell: {
+        width: "10%",
+        wordBreak: "break-all"
+    },
+    middleCell: {
+        width: "80%",
+        wordBreak: "break-all"
+    },
+    rightCell: {
+        width: "10%",
+        wordBreak: "break-all"
     }
+
 }))
 
 
@@ -50,17 +63,20 @@ const useRowStyles = makeStyles({
     shortUrlText: {
         maxWidth: "80%",
         wordBreak: "break-all"
+    },
+    leftCell: {
+        width: "10%",
+        wordBreak: "break-all"
+    },
+    middleCell: {
+        width: "80%",
+        wordBreak: "break-all"
+    },
+    rightCell: {
+        width: "10%",
+        wordBreak: "break-all"
     }
-  })
-
-
-
-
-
-
-
-
-
+})
 
 function Link(props) {
     const link = props.link
@@ -72,15 +88,15 @@ function Link(props) {
     return (
         <>
             <TableRow className={classes.root}>
-            <TableCell>
+            <TableCell className = {classes.leftCell}>
                 <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
                 {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                 </IconButton>
             </TableCell>
-            <TableCell className={classes.shortUrlText} component="th" scope="row">
+            <TableCell className = {classes.middleCell}>
                 {link.shortUrl}
             </TableCell>
-            <TableCell align="right"><Button onClick = {(e) => deleteHandler(link._id, index)}><DeleteIcon/></Button></TableCell>
+            <TableCell className = {classes.rightCell}><Button onClick = {(e) => deleteHandler(link._id, index)}><DeleteIcon/></Button></TableCell>
             </TableRow>
             <TableRow>
             <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -194,18 +210,14 @@ export function Homepage(props) {
             <form noValidate autoComplete="off">
                 <TextField value={full} onChange = {e => setFull(e.target.value)} id="standard-basic" label="Full URL" fullWidth/>
                 <TextField value={short} onChange = {e => setShort(e.target.value)} id="standard-basic" label="Short URL" fullWidth/>
+                <Button type="submit" className = {classes.submitButton} variant="contained" onClick = {handleSubmit}>Submit</Button>
             </form>
-            <Button className = {classes.submitButton} variant="contained" onClick = {handleSubmit}>Submit</Button>
             
             <p>Your Quote(s): <strong>{user.quote}</strong></p>
 
             {showLinksTableDisplay && <TableContainer component={Paper} elevation={3}>
+                {links.length === 0 && <p>You don't have any link.</p>}
                 <Table aria-label="collapsible table">
-                    <TableHead>
-                        <TableCell />
-                        <TableCell>Short URL</TableCell>
-                        <TableCell>Delete</TableCell>
-                    </TableHead>
                     <TableBody>
                         {links.map((link, index) => (
                             <Link key={link.shortUrl} index = {index} link = {link} deleteHandler = {deleteHandler}/>
@@ -220,8 +232,8 @@ export function Homepage(props) {
 
             <form noValidate autoComplete="off">
                 <TextField value={password} onChange = {e => setPassword(e.target.value)} id="standard-basic" label="new password" type="password" required fullWidth/>
+                <Button type="submit" className = {classes.submitButton} variant="contained" onClick = {changePasswordHandler}>Submit</Button>
             </form>
-            <Button className = {classes.submitButton} variant="contained" onClick = {changePasswordHandler}>Submit</Button>
 
         </div>
     )

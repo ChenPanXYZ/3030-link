@@ -50,17 +50,16 @@ export function Signup() {
             <form noValidate autoComplete="off">
                 <TextField value={username} onChange = {e => setUsername(e.target.value)} id="standard-basic" label="username" required fullWidth/>
                 <TextField value={password} onChange = {e => setPassword(e.target.value)} id="standard-basic" label="password" type="password" required fullWidth/>
+                <h3>Terms of Service</h3>
+                <ol style={{textAlign: "center"}}>
+                    <li align="left" textAlign="left">We collect your username and password.</li>
+                    <li align="left" textAlign="left">We collect your submitted short and full URLs.</li>
+                    <li align="left" textAlign="left">We reserve the right to delete any of the URLs you submitted.</li>
+                    <li align="left" textAlign="left">You have 10 quotes.</li>
+                </ol>
+                <p><strong>You must agree to Terms of Service before you click 'Sign Up'!</strong></p>
+                <Button type="submit" className = {classes.submitButton} variant="contained" onClick = {handleSubmit}>I Agree and Sign Up</Button>
             </form>
-
-            <h3>Terms of Service</h3>
-            <ol style={{textAlign: "center"}}>
-                <li align="left">We collect your username and password.</li>
-                <li align="left">We collect your submitted short and full URLs.</li>
-                <li align="left">We reserve the right to delete any of the URLs you submitted.</li>
-                <li align="left">You have 10 quotes.</li>
-            </ol>
-            <p><strong>You must agree to Terms of Service before you click 'Sign Up'!</strong></p>
-            <Button className = {classes.submitButton} variant="contained" onClick = {handleSubmit}>I Agree and Sign Up</Button>
         </div>
     )
 }

@@ -50,9 +50,15 @@ export function Login() {
             <form noValidate autoComplete="off">
                 <TextField value={username} onChange = {e => setUsername(e.target.value)} id="standard-basic" label="username" required fullWidth/>
                 <TextField value={password} onChange = {e => setPassword(e.target.value)} id="standard-basic" label="password" type="password" required fullWidth/>
+                <Button type="submit" className = {classes.submitButton} variant="contained" onClick = {handleSubmit}>Login</Button>
             </form>
-            <Button className = {classes.submitButton} variant="contained" onClick = {handleSubmit}>Login</Button>
             <p>Don't have an account? <a href="/signup">Join now</a>.</p>
+
+            <ol style={{textAlign: "center", wordBreak: "break-all"}}>
+                <li align="left" textAlign="left">3030.link is a URL Shortener Service.</li>
+                <li align="left" textAlign="left">You can set up 10 <strong>custom</strong> short url for your favourite links</li>
+                <li align="left" textAlign="left">For example, you can set <strong>music</strong> for <strong>https://www.youtube.com/watch?v=Y-JQ-RCyPpQ&t=13647s</strong>, so you just need to enter <strong><a href="/music">3030.link/music</a></strong> to enjoy your study music.</li>
+            </ol>
         </div>
     )
 }
